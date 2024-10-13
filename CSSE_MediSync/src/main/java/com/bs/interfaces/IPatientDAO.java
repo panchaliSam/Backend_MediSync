@@ -1,8 +1,8 @@
-package interfaces;
+package com.bs.interfaces;
 
 import java.util.List;
 
-import model.Patient;
+import com.bs.model.Patient;
 
 public interface IPatientDAO {
 	

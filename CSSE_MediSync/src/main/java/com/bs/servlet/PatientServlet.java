@@ -1,19 +1,19 @@
-package servlet;
+package com.bs.servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.Patient;
+import com.bs.model.Patient;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
-import dao.PatientDAO;
-import interfaces.IPatientDAO;
+import com.bs.dao.PatientDAO;
+import com.bs.interfaces.IPatientDAO;
 
 @WebServlet("/patients")
 public class PatientServlet extends HttpServlet {

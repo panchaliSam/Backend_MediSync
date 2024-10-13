@@ -65,3 +65,15 @@ CREATE TABLE patient_record (
     FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id),
     FOREIGN KEY (appointment_id) REFERENCES appointment(appointment_id)
 );
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,  -- Store hashed passwords for security
+    role ENUM('admin', 'doctor', 'patient') NOT NULL,  -- Different roles
+    hospital_id INT,  -- References hospital_id if the user is a doctor
+    patient_id INT,   -- References patient_id if the user is a patient
+    FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES patient(patient_id) ON DELETE CASCADE
+);
+

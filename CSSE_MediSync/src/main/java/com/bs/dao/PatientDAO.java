@@ -1,4 +1,4 @@
-package dao;
+package com.bs.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,9 +6,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import interfaces.IPatientDAO;
-import model.Patient;
-import utility.DBConnection;
+import com.bs.interfaces.IPatientDAO;
+import com.bs.model.Patient;
+import com.bs.utility.DBConnection;
 
 public class PatientDAO implements IPatientDAO {
 	// SQL Queries for Patient operations
