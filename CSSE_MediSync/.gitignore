@@ -1,3 +1,4 @@
 #Ignore database config file
 src/main/java/com/bs/utility/DBConnection.java
 
+/target/

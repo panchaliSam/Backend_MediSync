@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import com.bs.model.User;
 
-public interface IUser {
+public interface IUserDAO {
 	   void registerUser(User user) throws SQLException;
 	    User getUserByUsername(String username) throws SQLException;
 }
