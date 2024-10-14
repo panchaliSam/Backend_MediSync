@@ -1,11 +1,11 @@
-package servlet;
+package com.bs.servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import utility.DBConnection;
+import com.bs.utility.DBConnection;
 
 import java.io.IOException;
 import java.sql.Connection;

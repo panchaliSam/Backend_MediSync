@@ -1,4 +1,4 @@
-package model;
+package com.bs.model;
 
 public class Patient {
 
