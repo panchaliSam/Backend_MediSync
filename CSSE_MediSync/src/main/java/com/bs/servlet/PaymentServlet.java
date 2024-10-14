@@ -5,55 +5,55 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.bs.model.Patient;
+import com.bs.model.Payment;
+import com.bs.dao.PaymentDAO;
+import com.bs.interfaces.IPaymentDAO;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
-import com.bs.dao.PatientDAO;
-import com.bs.interfaces.IPatientDAO;
 
-@WebServlet("/patients")
-public class PatientServlet extends HttpServlet {
+@WebServlet("/payments")
+public class PaymentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    IPatientDAO iPatientDAO = new PatientDAO();
+    private IPaymentDAO iPaymentDAO = new PaymentDAO();
     private Gson gson = new Gson(); 
 
-    public PatientServlet() {
+    public PaymentServlet() {
         super();
     }
 
+    // Handle GET requests (view all or specific payment)
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        response.setContentType("application/json"); 
+        response.setContentType("application/json");
 
         if (action == null) {
-            List<Patient> patients = iPatientDAO.selectAllPatients();
-            response.getWriter().write(gson.toJson(patients));
-        } else if (action.equals("edit")) {
+            // Return all payments if no specific action
+            List<Payment> payments = iPaymentDAO.selectAllPayments();
+            response.getWriter().write(gson.toJson(payments));
+        } else if ("view".equals(action)) {
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Missing patient ID\"}");
+                response.getWriter().write("{\"error\": \"Missing payment ID\"}");
                 return;
             }
 
-            idParam = idParam.trim();
-
             try {
-                int patient_id = Integer.parseInt(idParam);
-                Patient patient = iPatientDAO.selectPatient(patient_id);
-                if (patient != null) {
-                    response.getWriter().write(gson.toJson(patient));
+                int payment_id = Integer.parseInt(idParam.trim());
+                Payment payment = iPaymentDAO.selectPayment(payment_id);
+                if (payment != null) {
+                    response.getWriter().write(gson.toJson(payment));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().write("{\"error\": \"Patient not found\"}");
+                    response.getWriter().write("{\"error\": \"Payment not found\"}");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Invalid patient ID format\"}");
+                response.getWriter().write("{\"error\": \"Invalid payment ID format\"}");
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().write("{\"error\": \"An unexpected error occurred\"}");
@@ -61,6 +61,7 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
+    // Handle POST requests (create new payment)
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         String action = request.getParameter("action");
@@ -74,13 +75,13 @@ public class PatientServlet extends HttpServlet {
         }
 
         String jsonString = jsonBuffer.toString();
-        Patient patient;
+        Payment payment;
 
         try {
-            patient = gson.fromJson(jsonString, Patient.class);
+            payment = gson.fromJson(jsonString, Payment.class);
             if ("create".equals(action)) {
-                iPatientDAO.insertPatient(patient);
-                response.getWriter().write("{\"message\": \"Patient created successfully\"}");
+                iPaymentDAO.insertPayment(payment);
+                response.getWriter().write("{\"message\": \"Payment created successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Invalid action\"}");
@@ -94,49 +95,43 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
+    // Handle PUT requests (update existing payment)
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
 
-        String patientIdParam = request.getParameter("patient_id");
-        if (patientIdParam == null) {
+        String paymentIdParam = request.getParameter("payment_id");
+        if (paymentIdParam == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Missing patient ID\"}");
+            response.getWriter().write("{\"error\": \"Missing payment ID\"}");
             return;
         }
 
-        int patient_id;
         try {
-        	patient_id = Integer.parseInt(patientIdParam);
-        } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Invalid Patient ID format\"}");
-            return;
-        }
+            int payment_id = Integer.parseInt(paymentIdParam.trim());
+            StringBuilder jsonBuffer = new StringBuilder();
+            String line;
 
-        StringBuilder jsonBuffer = new StringBuilder();
-        String line;
-
-        try (BufferedReader reader = request.getReader()) {
-            while ((line = reader.readLine()) != null) {
-                jsonBuffer.append(line);
+            try (BufferedReader reader = request.getReader()) {
+                while ((line = reader.readLine()) != null) {
+                    jsonBuffer.append(line);
+                }
             }
-        }
 
-        String jsonString = jsonBuffer.toString();
-        Patient patient;
+            String jsonString = jsonBuffer.toString();
+            Payment payment = gson.fromJson(jsonString, Payment.class);
+            payment.setPayment_id(payment_id); // Keep the original payment ID
 
-        try {
-            patient = gson.fromJson(jsonString, Patient.class);
-            patient.setPatient_id(patient_id); // Keep the original patientID
-
-            if (patient.getPatient_name() == null) {
+            if (payment.getPayment_date() == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Missing required fields\"}");
                 return;
             }
 
-            iPatientDAO.updatePatient(patient);
-            response.getWriter().write("{\"message\": \"Patient updated successfully\"}");
+            iPaymentDAO.updatePayment(payment);
+            response.getWriter().write("{\"message\": \"Payment updated successfully\"}");
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Invalid payment ID format\"}");
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid JSON format\"}");
@@ -146,13 +141,13 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
-    @Override
+    // Handle DELETE requests (delete payment)
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         String action = request.getParameter("action");
-        String patientIDStr = request.getParameter("id");
+        String paymentIDStr = request.getParameter("id");
 
-        if (action == null || patientIDStr == null) {
+        if (action == null || paymentIDStr == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Missing parameters\"}");
             return;
@@ -165,12 +160,12 @@ public class PatientServlet extends HttpServlet {
                 return;
             }
 
-            int patientID = Integer.parseInt(patientIDStr.trim());
-            iPatientDAO.deletePatient(patientID);
-            response.getWriter().write("{\"message\": \"Patient deleted successfully\"}");
+            int paymentID = Integer.parseInt(paymentIDStr.trim());
+            iPaymentDAO.deletePayment(paymentID);
+            response.getWriter().write("{\"message\": \"Payment deleted successfully\"}");
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Invalid Patient ID format\"}");
+            response.getWriter().write("{\"error\": \"Invalid payment ID format\"}");
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");

@@ -5,55 +5,62 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.bs.model.Patient;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
-import com.bs.dao.PatientDAO;
-import com.bs.interfaces.IPatientDAO;
 
-@WebServlet("/patients")
-public class PatientServlet extends HttpServlet {
+import com.bs.model.Hospital;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.bs.dao.HospitalDAO;
+import com.bs.interfaces.IHospitalDAO;
+
+/**
+ * Servlet implementation class HospitalServlet
+ */
+@WebServlet("/hospitals")
+public class HospitalServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    IPatientDAO iPatientDAO = new PatientDAO();
+    IHospitalDAO iHospitalDAO = new HospitalDAO();
     private Gson gson = new Gson(); 
-
-    public PatientServlet() {
+    
+    public HospitalServlet() {
         super();
     }
 
+    /**
+     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+     */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        response.setContentType("application/json"); 
+        response.setContentType("application/json");
 
         if (action == null) {
-            List<Patient> patients = iPatientDAO.selectAllPatients();
-            response.getWriter().write(gson.toJson(patients));
+            List<Hospital> hospitals = iHospitalDAO.selectAllHospitals();
+            response.getWriter().write(gson.toJson(hospitals));
         } else if (action.equals("edit")) {
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Missing patient ID\"}");
+                response.getWriter().write("{\"error\": \"Missing hospital ID\"}");
                 return;
             }
 
             idParam = idParam.trim();
 
             try {
-                int patient_id = Integer.parseInt(idParam);
-                Patient patient = iPatientDAO.selectPatient(patient_id);
-                if (patient != null) {
-                    response.getWriter().write(gson.toJson(patient));
+                int hospital_id = Integer.parseInt(idParam);
+                Hospital hospital = iHospitalDAO.selectHospital(hospital_id);
+                if (hospital != null) {
+                    response.getWriter().write(gson.toJson(hospital));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().write("{\"error\": \"Patient not found\"}");
+                    response.getWriter().write("{\"error\": \"Hospital not found\"}");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Invalid patient ID format\"}");
+                response.getWriter().write("{\"error\": \"Invalid hospital ID format\"}");
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().write("{\"error\": \"An unexpected error occurred\"}");
@@ -61,6 +68,9 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
+    /**
+     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+     */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         String action = request.getParameter("action");
@@ -74,13 +84,13 @@ public class PatientServlet extends HttpServlet {
         }
 
         String jsonString = jsonBuffer.toString();
-        Patient patient;
+        Hospital hospital;
 
         try {
-            patient = gson.fromJson(jsonString, Patient.class);
+            hospital = gson.fromJson(jsonString, Hospital.class);
             if ("create".equals(action)) {
-                iPatientDAO.insertPatient(patient);
-                response.getWriter().write("{\"message\": \"Patient created successfully\"}");
+                iHospitalDAO.insertHospital(hospital);
+                response.getWriter().write("{\"message\": \"Hospital created successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Invalid action\"}");
@@ -94,22 +104,25 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
+    /**
+     * @see HttpServlet#doPut(HttpServletRequest request, HttpServletResponse response)
+     */
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
 
-        String patientIdParam = request.getParameter("patient_id");
-        if (patientIdParam == null) {
+        String hospitalIdParam = request.getParameter("hospital_id");
+        if (hospitalIdParam == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Missing patient ID\"}");
+            response.getWriter().write("{\"error\": \"Missing hospital ID\"}");
             return;
         }
 
-        int patient_id;
+        int hospital_id;
         try {
-        	patient_id = Integer.parseInt(patientIdParam);
+            hospital_id = Integer.parseInt(hospitalIdParam);
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Invalid Patient ID format\"}");
+            response.getWriter().write("{\"error\": \"Invalid hospital ID format\"}");
             return;
         }
 
@@ -123,20 +136,20 @@ public class PatientServlet extends HttpServlet {
         }
 
         String jsonString = jsonBuffer.toString();
-        Patient patient;
+        Hospital hospital;
 
         try {
-            patient = gson.fromJson(jsonString, Patient.class);
-            patient.setPatient_id(patient_id); // Keep the original patientID
+            hospital = gson.fromJson(jsonString, Hospital.class);
+            hospital.setHospital_id(hospital_id); // Keep the original hospital ID
 
-            if (patient.getPatient_name() == null) {
+            if (hospital.getHospital_name() == null) { // Assuming Hospital has a method to get the name
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Missing required fields\"}");
                 return;
             }
 
-            iPatientDAO.updatePatient(patient);
-            response.getWriter().write("{\"message\": \"Patient updated successfully\"}");
+            iHospitalDAO.updateHospital(hospital);
+            response.getWriter().write("{\"message\": \"Hospital updated successfully\"}");
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid JSON format\"}");
@@ -146,13 +159,15 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
-    @Override
+    /**
+     * @see HttpServlet#doDelete(HttpServletRequest request, HttpServletResponse response)
+     */
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         String action = request.getParameter("action");
-        String patientIDStr = request.getParameter("id");
+        String hospitalIDStr = request.getParameter("id");
 
-        if (action == null || patientIDStr == null) {
+        if (action == null || hospitalIDStr == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Missing parameters\"}");
             return;
@@ -165,12 +180,12 @@ public class PatientServlet extends HttpServlet {
                 return;
             }
 
-            int patientID = Integer.parseInt(patientIDStr.trim());
-            iPatientDAO.deletePatient(patientID);
-            response.getWriter().write("{\"message\": \"Patient deleted successfully\"}");
+            int hospital_id = Integer.parseInt(hospitalIDStr.trim());
+            iHospitalDAO.deleteHospital(hospital_id);
+            response.getWriter().write("{\"message\": \"Hospital deleted successfully\"}");
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Invalid Patient ID format\"}");
+            response.getWriter().write("{\"error\": \"Invalid Hospital ID format\"}");
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
