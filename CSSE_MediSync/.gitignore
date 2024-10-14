@@ -1,2 +1,17 @@
 #Ignore database config file
 src/main/java/utility/DBConnection.java
+
+#ignore build
+build/
+
+#ignore 
+target/
+
+#pom.xml
+pom.xml
+
+#Ignore path
+.project
+
+#ignore classpath
+.classpath
