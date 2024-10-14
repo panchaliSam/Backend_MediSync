@@ -12,3 +12,6 @@ pom.xml
 
 #Ignore path
 .project
+
+#Ignore class path
+.classpath
