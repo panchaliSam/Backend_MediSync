@@ -2,14 +2,14 @@ package com.bs.model;
 
 public class Patient {
 
-	private int patientID;
-	private String patientName;
-	private int patientAge;
-	private String patientEmail;
-	private String medicalHistory;
-	private String allergies;
-	private String emergencyContact;
-	private String relation;
+	private int patient_id;
+	private String patient_name;
+	private int age;
+	private String dob;
+	private String contact_no;
+	private String emergency_contact_no;
+	private String emergency_relation;
+	private String allergy;
 	
 	
 	
@@ -17,65 +17,111 @@ public class Patient {
 		super();
 	}
 
-	public Patient(int patientID, String patientName, int patientAge, String patientEmail, String medicalHistory, String allergies, String emergencyContact, String relation) {
+	public Patient(int patient_id, String patient_name, int age, String dob, String contact_no, String emergency_contact_no, String emergency_relation, String allergy) {
 		super();
-		this.patientID = patientID;
-		this.patientName = patientName;
-		this.patientAge = patientAge;
-		this.patientEmail = patientEmail;
-		this.medicalHistory = medicalHistory;
-		this.allergies = allergies;
-		this.emergencyContact = emergencyContact;
-		this.relation = relation;
+		this.patient_id = patient_id;
+		this.patient_name = patient_name;
+		this.age = age;
+		this.dob = dob;
+		this.contact_no = contact_no;
+		this.emergency_contact_no = emergency_contact_no;
+		this.emergency_relation = emergency_relation;
+		this.allergy = allergy;
+	}
+
+	public int getPatient_id() {
+		return patient_id;
+	}
+
+
+
+	public void setPatient_id(int patient_id) {
+		this.patient_id = patient_id;
+	}
+
+
+
+	public String getPatient_name() {
+		return patient_name;
+	}
+
+
+
+	public void setPatient_name(String patient_name) {
+		this.patient_name = patient_name;
+	}
+
+
+
+	public int getAge() {
+		return age;
+	}
+
+
+
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+
+
+	public String getDob() {
+		return dob;
+	}
+
+
+
+	public void setDob(String dob) {
+		this.dob = dob;
+	}
+
+
+
+	public String getContact_no() {
+		return contact_no;
+	}
+
+
+
+	public void setContact_no(String contact_no) {
+		this.contact_no = contact_no;
+	}
+
+
+
+	public String getEmergency_contact_no() {
+		return emergency_contact_no;
+	}
+
+
+
+	public void setEmergency_contact_no(String emergency_contact_no) {
+		this.emergency_contact_no = emergency_contact_no;
+	}
+
+
+
+	public String getEmergency_relation() {
+		return emergency_relation;
+	}
+
+
+
+	public void setEmergency_relation(String emergency_relation) {
+		this.emergency_relation = emergency_relation;
+	}
+
+
+
+	public String getAllergy() {
+		return allergy;
+	}
+
+
+
+	public void setAllergy(String allergy) {
+		this.allergy = allergy;
 	}
 	
-	public int getPatientID() {
-		return patientID;
-	}
-	public void setPatientID(int patientID) {
-		this.patientID = patientID;
-	}
-	public String getPatientName() {
-		return patientName;
-	}
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
-	public int getPatientAge() {
-		return patientAge;
-	}
-	public void setPatientAge(int patientAge) {
-		this.patientAge = patientAge;
-	}
-	public String getPatientEmail() {
-		return patientEmail;
-	}
-	public void setPatientEmail(String patientEmail) {
-		this.patientEmail = patientEmail;
-	}
-	public String getMedicalHistory() {
-		return medicalHistory;
-	}
-	public void setMedicalHistory(String medicalHistory) {
-		this.medicalHistory = medicalHistory;
-	}
-	public String getAllergies() {
-		return allergies;
-	}
-	public void setAllergies(String allergies) {
-		this.allergies = allergies;
-	}
-	public String getEmergencyContact() {
-		return emergencyContact;
-	}
-	public void setEmergencyContact(String emergencyContact) {
-		this.emergencyContact = emergencyContact;
-	}
-	public String getRelation() {
-		return relation;
-	}
-	public void setRelation(String relation) {
-		this.relation = relation;
-	}
 	
 }
