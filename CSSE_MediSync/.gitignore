@@ -1,4 +1,14 @@
 #Ignore database config file
 src/main/java/com/bs/utility/DBConnection.java
 
-/target/
+#Ignore build
+build/
+
+#Ignore target
+target/
+
+#Ignore pom.xml
+pom.xml
+
+#Ignore path
+.project
