@@ -7,8 +7,8 @@ public class Appointment {
     private int appointmentId;
     private int hospitalId;
     private int doctorId;
-    private LocalDate appointmentDate;
-    private LocalTime appointmentTime;
+	public LocalDate appointmentDate;
+	public LocalTime appointmentTime;
     private int patientId;
     private int paymentId;
     
@@ -31,7 +31,31 @@ public class Appointment {
         this.setPatientName(patientName);
         this.setPaymentAmount(paymentAmount);
     }
+    
+    public Appointment(int appointmentId, int hospitalId, int doctorId, LocalDate appointmentDate,
+			LocalTime appointmentTime, int patientId, int paymentId) {
+		super();
+		this.appointmentId = appointmentId;
+		this.hospitalId = hospitalId;
+		this.doctorId = doctorId;
+		this.appointmentDate = appointmentDate;
+		this.appointmentTime = appointmentTime;
+		this.patientId = patientId;
+		this.paymentId = paymentId;
+	}
 
+    // Constructor without payment_id
+    public Appointment(int appointmentId, String hospitalName, String doctorName, String specialization,
+                       LocalDate appointmentDate, LocalTime appointmentTime, String patientName) {
+        this.appointmentId = appointmentId;
+        this.hospitalName = hospitalName;
+        this.doctorName = doctorName;
+        this.specialization = specialization;
+        this.appointmentDate = appointmentDate;
+        this.appointmentTime = appointmentTime;
+        this.patientName = patientName;
+    }
+    
 	// Getter and Setter methods
     public int getAppointmentId() {
         return appointmentId;
@@ -128,4 +152,23 @@ public class Appointment {
 	public void setPaymentAmount(double paymentAmount) {
 		this.paymentAmount = paymentAmount;
 	}
+	
+	@Override
+	public String toString() {
+	    return "Appointment{" +
+	            "appointmentId=" + appointmentId +
+	            ", hospitalId=" + hospitalId +
+	            ", doctorId=" + doctorId +
+	            ", appointmentDate=" + appointmentDate +
+	            ", appointmentTime=" + appointmentTime +
+	            ", patientId=" + patientId +
+	            ", paymentId=" + paymentId +
+	            ", hospitalName='" + hospitalName + '\'' +
+	            ", doctorName='" + doctorName + '\'' +
+	            ", specialization='" + specialization + '\'' +
+	            ", patientName='" + patientName + '\'' +
+	            ", paymentAmount=" + paymentAmount +
+	            '}';
+	}
+
 }
