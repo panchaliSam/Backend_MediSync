@@ -25,14 +25,18 @@ public class PatientServlet extends HttpServlet {
         super();
     }
 
+    // Handle GET requests
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        response.setContentType("application/json"); 
+        response.setContentType("application/json");
 
         if (action == null) {
+            // Retrieve all patients
             List<Patient> patients = iPatientDAO.selectAllPatients();
             response.getWriter().write(gson.toJson(patients));
         } else if (action.equals("edit")) {
+            // Edit patient details by ID
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -41,7 +45,6 @@ public class PatientServlet extends HttpServlet {
             }
 
             idParam = idParam.trim();
-
             try {
                 int patient_id = Integer.parseInt(idParam);
                 Patient patient = iPatientDAO.selectPatient(patient_id);
@@ -61,6 +64,8 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
+    // Handle POST requests for creating a new patient
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         String action = request.getParameter("action");
@@ -94,6 +99,8 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
+    // Handle PUT requests for updating a patient's details
+    @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
 
@@ -106,7 +113,7 @@ public class PatientServlet extends HttpServlet {
 
         int patient_id;
         try {
-        	patient_id = Integer.parseInt(patientIdParam);
+            patient_id = Integer.parseInt(patientIdParam);
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid Patient ID format\"}");
@@ -127,7 +134,7 @@ public class PatientServlet extends HttpServlet {
 
         try {
             patient = gson.fromJson(jsonString, Patient.class);
-            patient.setPatient_id(patient_id); // Keep the original patientID
+            patient.setPatient_id(patient_id); // Keep the original patient ID
 
             if (patient.getPatient_name() == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -146,6 +153,7 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
+    // Handle DELETE requests for removing a patient
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
