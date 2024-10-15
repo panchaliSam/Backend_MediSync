@@ -3,94 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment List</title>
+    <title>Welcome to MediSync</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 0;
+            text-align: center; /* Center align text */
         }
         h1 {
-            text-align: center;
+            margin-bottom: 20px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
+        .content {
+            margin: 20px 0;
+            padding: 10px;
             border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        .loading {
-            text-align: center;
-            font-size: 18px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
 
-    <h1>Appointment Details</h1>
-    <div class="loading">Loading appointments...</div>
-    <table id="appointmentTable">
-        <thead>
-            <tr>
-                <th>Appointment ID</th>
-                <th>Hospital Name</th>
-                <th>Doctor Name</th>
-                <th>Specialization</th>
-                <th>Appointment Date</th>
-                <th>Appointment Time</th>
-                <th>Patient Name</th>
-                <th>Payment Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Appointment data will be populated here -->
-        </tbody>
-    </table>
+    <h1>Welcome to MediSync: Smart Healthcare</h1>
 
-    <script>
-        // Fetch appointment details from the servlet
-        fetch('appointments') // Update with your app context
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const tableBody = document.getElementById('appointmentTable').querySelector('tbody');
-                tableBody.innerHTML = ''; // Clear loading message
+    <div class="content">
+        <h2>1. User-Friendly Interface</h2>
+        <p>Experience a seamless and intuitive design that makes navigating our application a breeze.</p>
+    </div>
 
-                data.forEach(appointment => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${appointment.appointmentId}</td>
-                        <td>${appointment.hospitalName}</td>
-                        <td>${appointment.doctorName}</td>
-                        <td>${appointment.specialization}</td>
-                        <td>${appointment.appointmentDate}</td>
-                        <td>${appointment.appointmentTime}</td>
-                        <td>${appointment.patientName}</td>
-                        <td>${appointment.paymentAmount}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching appointment details:', error);
-                document.querySelector('.loading').innerText = 'Failed to load appointment details.';
-            });
-    </script>
+    <div class="content">
+        <h2>2. Appointment Management</h2>
+        <p>Easily manage your appointments with just a few clicks. Stay organized and on schedule!</p>
+    </div>
+
+    <div class="content">
+        <h2>3. Real-Time Notifications</h2>
+        <p>Receive timely alerts for upcoming appointments, reminders, and updates directly on your device.</p>
+    </div>
+
+    <div class="content">
+        <h2>4. Secure Data Protection</h2>
+        <p>Your privacy is our priority. We ensure that your data is safe and secure at all times.</p>
+    </div>
+
+    <div class="content">
+        <h2>5. 24/7 Customer Support</h2>
+        <p>Our dedicated support team is here to assist you anytime you need help or have questions.</p>
+    </div>
 
 </body>
 </html>
