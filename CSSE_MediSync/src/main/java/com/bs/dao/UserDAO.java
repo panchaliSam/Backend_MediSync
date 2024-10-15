@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import com.bs.interfaces.IUserDAO;
 import com.bs.model.User;
 import com.bs.utility.DBConnection;
@@ -12,34 +14,39 @@ import com.bs.utility.DBConnection;
 public class UserDAO implements IUserDAO {
     private Connection connection;
 
+    // SQL statements as private static final fields
+    private static final String INSERT_USER_SQL = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+    private static final String SELECT_USER_SQL = "SELECT user_id, username, password_hash FROM users WHERE username = ?";
+
     public UserDAO() {
         connection = DBConnection.getConnection();
     }
 
     @Override
     public void registerUser(User user) throws SQLException {
-        // Updated SQL statement without the role field
-        String sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(INSERT_USER_SQL)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPasswordHash());
-            // Role is no longer needed
             ps.executeUpdate();
         }
     }
 
     @Override
-    public User getUserByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM users WHERE username = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+    public User loginUser(String username, String password) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(SELECT_USER_SQL)) {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                // Updated User constructor call without the role field
-                return new User(rs.getInt("user_id"), rs.getString("username"),
-                        rs.getString("password_hash"));
+                String storedHash = rs.getString("password_hash");
+                
+                // Validate password using BCrypt
+                if (BCrypt.checkpw(password, storedHash)) {
+                    int userId = rs.getInt("user_id");
+                    String dbUsername = rs.getString("username");
+                    return new User(userId, dbUsername, storedHash);
+                }
             }
-            return null;
         }
+        return null;
     }
 }

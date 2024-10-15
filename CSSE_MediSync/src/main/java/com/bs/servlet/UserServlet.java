@@ -36,43 +36,18 @@ public class UserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response); 
-        String action = request.getParameter("action");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        addCorsHeaders(response);
         response.setContentType("application/json");
 
+        String action = request.getParameter("action");
         if (action == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Action is required\"}");
-        } else if (action.equals("getUser")) {
-            String username = request.getParameter("username");
-            if (username == null || username.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Username is required\"}");
-                return;
-            }
-
-            try {
-                User user = iUserDAO.getUserByUsername(username);
-                if (user != null) {
-                    response.getWriter().write(gson.toJson(user));
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().write("{\"error\": \"User not found\"}");
-                }
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
-            }
+            return;
         }
-    }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response); 
-        response.setContentType("application/json");
-
-        // Read JSON body from the request
+        // Read JSON body
         StringBuilder jsonBuffer = new StringBuilder();
         String line;
         try (BufferedReader reader = request.getReader()) {
@@ -80,29 +55,43 @@ public class UserServlet extends HttpServlet {
                 jsonBuffer.append(line);
             }
         }
-        
-        // Parse JSON body
         String jsonData = jsonBuffer.toString();
         JsonObject jsonObject = gson.fromJson(jsonData, JsonObject.class);
         String username = jsonObject.get("username").getAsString();
         String password = jsonObject.get("password").getAsString();
-        
+
         if (username == null || password == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Username and password are required\"}");
             return;
         }
 
-        // Hash password before storing
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        User user = new User(username, hashedPassword); 
+        if (action.equals("register")) {
+            // Register user logic
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+            User user = new User(username, hashedPassword);
 
-        try {
-            iUserDAO.registerUser(user);
-            response.getWriter().write("{\"message\": \"User registered successfully\"}");
-        } catch (SQLException e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"error\": \"Error registering user: " + e.getMessage() + "\"}");
+            try {
+                iUserDAO.registerUser(user);
+                response.getWriter().write("{\"message\": \"User registered successfully\"}");
+            } catch (SQLException e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"error\": \"Error registering user: " + e.getMessage() + "\"}");
+            }
+        } else if (action.equals("login")) {
+            // Login logic
+            try {
+                User user = iUserDAO.loginUser(username, password);
+                if (user != null) {
+                    response.getWriter().write(gson.toJson(user));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"error\": \"Invalid username or password\"}");
+                }
+            } catch (SQLException e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
+            }
         }
     }
 
