@@ -5,20 +5,20 @@ public class Doctor {
 	private String doctor_name;
 	private String specialization;
 	private String contact_no;
-	private int hospital_id;
+	private String hospital_name;
 	private double doctor_charge;
 	
 	public Doctor() {
 		super();
 	}
 
-	public Doctor(int doctor_id, String doctor_name, String specialization, String contact_no, int hospital_id, double doctor_charge) {
+	public Doctor(int doctor_id, String doctor_name, String specialization, String contact_no, String hospital_name, double doctor_charge) {
 		super();
 		this.doctor_id = doctor_id;
 		this.doctor_name = doctor_name;
 		this.specialization = specialization;
 		this.contact_no = contact_no;
-		this.hospital_id = hospital_id;
+		this.hospital_name = hospital_name;
 		this.doctor_charge = doctor_charge;
 	}
 	
@@ -46,12 +46,6 @@ public class Doctor {
 	public void setContact_no(String contact_no) {
 		this.contact_no = contact_no;
 	}
-	public int getHospital_id() {
-		return hospital_id;
-	}
-	public void setHospital_id(int hospital_id) {
-		this.hospital_id = hospital_id;
-	}
 	public double getDoctor_charge() {
 		return doctor_charge;
 	}
@@ -59,4 +53,11 @@ public class Doctor {
 		this.doctor_charge = doctor_charge;
 	}
 
+	public String getHospital_name() {
+		return hospital_name;
+	}
+
+	public void setHospital_name(String hospital_name) {
+		this.hospital_name = hospital_name;
+	}
 }

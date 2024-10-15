@@ -12,8 +12,15 @@ import com.bs.utility.DBConnection;
 
 public class DoctorDAO implements IDoctorDAO {
     // SQL Queries for Doctor operations
-    String SELECT_DOCTOR_BY_ID = "SELECT * FROM doctor WHERE doctor_id = ?";
-    String SELECT_ALL_DOCTORS = "SELECT * FROM doctor";
+    String SELECT_DOCTOR_BY_ID = "SELECT d.doctor_id, d.doctor_name, d.specialization, d.contact_no, h.hospital_name, d.doctor_charge " +
+            "FROM doctor d " +
+            "INNER JOIN hospital h ON d.hospital_id = h.hospital_id " +
+            "WHERE d.doctor_id = ?";
+
+    String SELECT_ALL_DOCTORS = "SELECT d.doctor_id, d.doctor_name, d.specialization, d.contact_no, h.hospital_name, d.doctor_charge " +
+            "FROM doctor d " +
+            "INNER JOIN hospital h ON d.hospital_id = h.hospital_id";
+
     String INSERT_DOCTOR = "INSERT INTO doctor (doctor_name, specialization, contact_no, hospital_id, doctor_charge) VALUES (?, ?, ?, ?, ?)";
     String UPDATE_DOCTOR = "UPDATE doctor SET doctor_name=?, specialization=?, contact_no=?, hospital_id=?, doctor_charge=? WHERE doctor_id = ?";
     String DELETE_DOCTOR = "DELETE FROM doctor WHERE doctor_id = ?";
@@ -30,10 +37,10 @@ public class DoctorDAO implements IDoctorDAO {
                 String doctor_name = rs.getString("doctor_name");
                 String specialization = rs.getString("specialization");
                 String contact_no = rs.getString("contact_no");
-                int hospital_id = rs.getInt("hospital_id");
+                String hospital_name = rs.getString("hospital_name"); 
                 double doctor_charge = rs.getDouble("doctor_charge");
 
-                Doctor doctor = new Doctor(doctor_id, doctor_name, specialization, contact_no, hospital_id, doctor_charge);
+                Doctor doctor = new Doctor(doctor_id, doctor_name, specialization, contact_no, hospital_name, doctor_charge);
                 doctors.add(doctor);
             }
         } catch (Exception e) {
@@ -54,10 +61,10 @@ public class DoctorDAO implements IDoctorDAO {
                     String doctor_name = rs.getString("doctor_name");
                     String specialization = rs.getString("specialization");
                     String contact_no = rs.getString("contact_no");
-                    int hospital_id = rs.getInt("hospital_id");
+                    String hospital_name = rs.getString("hospital_name"); 
                     double doctor_charge = rs.getDouble("doctor_charge");
 
-                    doctor = new Doctor(doctor_id, doctor_name, specialization, contact_no, hospital_id, doctor_charge);
+                    doctor = new Doctor(doctor_id, doctor_name, specialization, contact_no, hospital_name, doctor_charge);
                 }
             }
         } catch (Exception e) {
@@ -65,8 +72,9 @@ public class DoctorDAO implements IDoctorDAO {
         }
         return doctor;
     }
-    
-    //method to check if a hospital exists
+
+
+    // Method to check if a hospital exists
     public boolean doesHospitalExist(int hospitalId) {
         String query = "SELECT COUNT(*) FROM hospital WHERE hospital_id = ?";
         try (Connection con = DBConnection.getConnection();
@@ -83,10 +91,29 @@ public class DoctorDAO implements IDoctorDAO {
         return false; // Hospital doesn't exist
     }
 
+    // Method to get hospital ID by hospital name
+    public int getHospitalIdByName(String hospitalName) {
+        int hospitalId = -1;
+        String query = "SELECT hospital_id FROM hospital WHERE hospital_name = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setString(1, hospitalName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    hospitalId = rs.getInt("hospital_id");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return hospitalId;
+    }
+
     @Override
     public void insertDoctor(Doctor doctor) {
-    	if (!doesHospitalExist(doctor.getHospital_id())) {
-            throw new IllegalArgumentException("Hospital ID does not exist: " + doctor.getHospital_id());
+        int hospitalId = getHospitalIdByName(doctor.getHospital_name());
+        if (hospitalId == -1) {
+            throw new IllegalArgumentException("Hospital name does not exist: " + doctor.getHospital_name());
         }
         
         try (Connection con = DBConnection.getConnection();
@@ -95,7 +122,7 @@ public class DoctorDAO implements IDoctorDAO {
             stmt.setString(1, doctor.getDoctor_name());
             stmt.setString(2, doctor.getSpecialization());
             stmt.setString(3, doctor.getContact_no());
-            stmt.setInt(4, doctor.getHospital_id()); 
+            stmt.setInt(4, hospitalId);
             stmt.setDouble(5, doctor.getDoctor_charge());
 
             stmt.executeUpdate();
@@ -106,22 +133,20 @@ public class DoctorDAO implements IDoctorDAO {
 
     @Override
     public void updateDoctor(Doctor doctor) {
-    	// Check if the hospital_id exists before updating
-        if (!doesHospitalExist(doctor.getHospital_id())) {
-            throw new IllegalArgumentException("Hospital ID does not exist: " + doctor.getHospital_id());
+        int hospitalId = getHospitalIdByName(doctor.getHospital_name());
+        if (hospitalId == -1) {
+            throw new IllegalArgumentException("Hospital name does not exist: " + doctor.getHospital_name());
         }
 
-        String UPDATE_DOCTOR = "UPDATE doctor SET doctor_name=?, specialization=?, contact_no=?, hospital_id=?, doctor_charge=? WHERE doctor_id = ?";
-        
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(UPDATE_DOCTOR)) {
 
             stmt.setString(1, doctor.getDoctor_name());
             stmt.setString(2, doctor.getSpecialization());
             stmt.setString(3, doctor.getContact_no());
-            stmt.setInt(4, doctor.getHospital_id()); // Setting the hospital_id
+            stmt.setInt(4, hospitalId);
             stmt.setDouble(5, doctor.getDoctor_charge());
-            stmt.setInt(6, doctor.getDoctor_id()); // Setting the doctor_id to identify the record
+            stmt.setInt(6, doctor.getDoctor_id());
 
             stmt.executeUpdate();
         } catch (Exception e) {
