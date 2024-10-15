@@ -72,3 +72,23 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL  -- Store hashed passwords for security
 );
 
+
+
+
+
+use medisync;
+
+SELECT 
+	   a.appointment_id,
+	   h.hospital_name, 
+       d.doctor_name, 
+       d.specialization, 
+       a.appointment_date, 
+       a.appointment_time, 
+       p.patient_name, 
+       pay.amount
+FROM appointment a
+INNER JOIN hospital h ON h.hospital_id = a.hospital_id
+INNER JOIN doctor d ON d.doctor_id = a.doctor_id
+INNER JOIN patient p ON p.patient_id = a.patient_id
+INNER JOIN payment pay ON pay.payment_id = a.payment_id;
