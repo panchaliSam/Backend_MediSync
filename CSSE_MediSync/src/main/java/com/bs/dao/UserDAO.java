@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import com.bs.interfaces.IUserDAO;
 import com.bs.model.User;
 import com.bs.utility.DBConnection;
@@ -28,18 +30,23 @@ public class UserDAO implements IUserDAO {
         }
     }
 
-    @Override
-    public User getUserByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM users WHERE username = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, username);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                // Updated User constructor call without the role field
-                return new User(rs.getInt("user_id"), rs.getString("username"),
-                        rs.getString("password_hash"));
-            }
-            return null;
-        }
-    }
+	@Override
+	public User loginUser(String username, String password) throws SQLException {
+		String sql = "SELECT user_id, username,password_hash FROM users WHERE username = ?";
+		try(PreparedStatement ps = connection.prepareStatement(sql)){
+			ps.setString(1, username);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()) {
+				String storedHash = rs.getString("password_hash");
+				
+				//Validate password using BCrypt
+				if(BCrypt.checkpw(password, storedHash)) {
+					int userId = rs.getInt("user_id");
+					String dbUsername = rs.getString("username");
+					return new User(userId, dbUsername, storedHash);
+				}
+			}
+		}
+		return null;
+	}
 }
