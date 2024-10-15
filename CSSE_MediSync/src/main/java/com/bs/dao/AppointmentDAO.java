@@ -1,9 +1,5 @@
 package com.bs.dao;
 
-import com.bs.interfaces.IAppointmentDAO;
-import com.bs.model.Appointment;
-import com.bs.utility.DBConnection;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,18 +9,13 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bs.interfaces.IAppointmentDAO;
+import com.bs.model.Appointment;
+import com.bs.utility.DBConnection;
+
 public class AppointmentDAO implements IAppointmentDAO {
-    private Connection connection;
-
-    public AppointmentDAO() {
-        connection = DBConnection.getConnection(); // Initialize the DB connection
-    }
-
-    @Override
-    public List<Appointment> getAppointmentDetails() throws SQLException {
-        List<Appointment> appointmentDetailsList = new ArrayList<>();
-
-        String sql = "SELECT " +
+    // SQL Queries for Appointment operations
+    private static final String SELECT_ALL_APPOINTMENTS = "SELECT " +
                      "   a.appointment_id, " +
                      "   h.hospital_name, " +
                      "   d.doctor_name, " +
@@ -39,8 +30,13 @@ public class AppointmentDAO implements IAppointmentDAO {
                      "INNER JOIN patient p ON p.patient_id = a.patient_id " +
                      "INNER JOIN payment pay ON pay.payment_id = a.payment_id";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+    @Override
+    public List<Appointment> getAppointmentDetails() throws SQLException {
+        List<Appointment> appointmentDetailsList = new ArrayList<>();
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(SELECT_ALL_APPOINTMENTS);
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 // Fetching data from the ResultSet
