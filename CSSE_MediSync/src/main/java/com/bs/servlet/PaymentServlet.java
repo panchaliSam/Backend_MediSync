@@ -14,6 +14,7 @@ import com.google.gson.JsonSyntaxException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
+import com.bs.utility.CorsUtil;
 
 @WebServlet("/payments")
 public class PaymentServlet extends HttpServlet {
@@ -28,6 +29,7 @@ public class PaymentServlet extends HttpServlet {
     // Handle GET requests (view all or specific payment)
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         if (action == null) {
@@ -63,7 +65,8 @@ public class PaymentServlet extends HttpServlet {
 
     // Handle POST requests (create new payment)
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
+    	CorsUtil.addCorsHeaders(response);
+    	response.setContentType("application/json");
         String action = request.getParameter("action");
         StringBuilder jsonBuffer = new StringBuilder();
         String line;
@@ -97,7 +100,8 @@ public class PaymentServlet extends HttpServlet {
 
     // Handle PUT requests (update existing payment)
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
+    	CorsUtil.addCorsHeaders(response);
+    	response.setContentType("application/json");
 
         String paymentIdParam = request.getParameter("payment_id");
         if (paymentIdParam == null) {
@@ -143,7 +147,8 @@ public class PaymentServlet extends HttpServlet {
 
     // Handle DELETE requests (delete payment)
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
+    	CorsUtil.addCorsHeaders(response);
+    	response.setContentType("application/json");
         String action = request.getParameter("action");
         String paymentIDStr = request.getParameter("id");
 

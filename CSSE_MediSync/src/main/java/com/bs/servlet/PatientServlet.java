@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 import com.bs.dao.PatientDAO;
 import com.bs.interfaces.IPatientDAO;
+import com.bs.utility.CorsUtil;
 
 @WebServlet("/patients")
 public class PatientServlet extends HttpServlet {
@@ -25,10 +26,18 @@ public class PatientServlet extends HttpServlet {
         super();
     }
 
+    // Handle OPTIONS requests
+    @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CorsUtil.addCorsHeaders(response);
+        response.setStatus(HttpServletResponse.SC_OK); // Respond with 200 OK
+    }
+
     // Handle GET requests
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         if (action == null) {
@@ -67,6 +76,7 @@ public class PatientServlet extends HttpServlet {
     // Handle POST requests for creating a new patient
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
         String action = request.getParameter("action");
         StringBuilder jsonBuffer = new StringBuilder();
@@ -102,6 +112,7 @@ public class PatientServlet extends HttpServlet {
     // Handle PUT requests for updating a patient's details
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         String patientIdParam = request.getParameter("patient_id");
@@ -156,6 +167,7 @@ public class PatientServlet extends HttpServlet {
     // Handle DELETE requests for removing a patient
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
         String action = request.getParameter("action");
         String patientIDStr = request.getParameter("id");

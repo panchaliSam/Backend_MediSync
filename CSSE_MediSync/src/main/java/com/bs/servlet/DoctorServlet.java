@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.bs.interfaces.IDoctorDAO;
 import com.bs.dao.DoctorDAO;
+import com.bs.utility.CorsUtil;
 
 /**
  * Servlet implementation class DoctorServlet
@@ -36,6 +37,7 @@ public class DoctorServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		String action = request.getParameter("action");
+		CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         if (action == null) {
@@ -75,6 +77,7 @@ public class DoctorServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		CorsUtil.addCorsHeaders(response);
 		response.setContentType("application/json");
         String action = request.getParameter("action");
         StringBuilder jsonBuffer = new StringBuilder();
@@ -112,6 +115,7 @@ public class DoctorServlet extends HttpServlet {
 	 */
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		CorsUtil.addCorsHeaders(response);
 		response.setContentType("application/json");
 
         String doctorIdParam = request.getParameter("doctor_id");
@@ -168,6 +172,7 @@ public class DoctorServlet extends HttpServlet {
 	 */
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		CorsUtil.addCorsHeaders(response);
 		response.setContentType("application/json");
         String action = request.getParameter("action");
         String doctorIDStr = request.getParameter("id");

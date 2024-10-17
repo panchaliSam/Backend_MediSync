@@ -14,6 +14,7 @@ import com.bs.model.LocalTimeDeserializer;
 import com.bs.model.LocalTimeSerializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.bs.utility.CorsUtil;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -39,16 +40,9 @@ public class AppointmentServlet extends HttpServlet {
         gson = gsonBuilder.create(); // Create the Gson instance
     } 
 
-    private void addCorsHeaders(HttpServletResponse response) {
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-    }
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response);
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         try {
@@ -68,7 +62,7 @@ public class AppointmentServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response);
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         try {
@@ -100,7 +94,7 @@ public class AppointmentServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response);
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         try {
@@ -122,7 +116,7 @@ public class AppointmentServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response);
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         try {
@@ -155,7 +149,7 @@ public class AppointmentServlet extends HttpServlet {
 
     @Override
     protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response);
+        CorsUtil.addCorsHeaders(response);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }
