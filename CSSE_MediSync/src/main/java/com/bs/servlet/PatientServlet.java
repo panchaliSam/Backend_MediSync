@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.bs.model.Patient;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
@@ -19,21 +18,19 @@ import com.bs.utility.CorsUtil;
 @WebServlet("/patients")
 public class PatientServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    IPatientDAO iPatientDAO = new PatientDAO();
+    private IPatientDAO iPatientDAO = new PatientDAO();
     private Gson gson = new Gson(); 
 
     public PatientServlet() {
         super();
     }
 
-    // Handle OPTIONS requests
     @Override
     protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CorsUtil.addCorsHeaders(response);
-        response.setStatus(HttpServletResponse.SC_OK); // Respond with 200 OK
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 
-    // Handle GET requests
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -41,61 +38,61 @@ public class PatientServlet extends HttpServlet {
         response.setContentType("application/json");
 
         if (action == null) {
-            // Retrieve all patients
             List<Patient> patients = iPatientDAO.selectAllPatients();
             response.getWriter().write(gson.toJson(patients));
-        } else if (action.equals("edit")) {
-            // Edit patient details by ID
-            String idParam = request.getParameter("id");
-            if (idParam == null || idParam.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Missing patient ID\"}");
-                return;
-            }
-
-            idParam = idParam.trim();
-            try {
-                int patient_id = Integer.parseInt(idParam);
-                Patient patient = iPatientDAO.selectPatient(patient_id);
-                if (patient != null) {
-                    response.getWriter().write(gson.toJson(patient));
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().write("{\"error\": \"Patient not found\"}");
-                }
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Invalid patient ID format\"}");
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("{\"error\": \"An unexpected error occurred\"}");
-            }
+        } else if ("edit".equals(action)) {
+            handleEditPatient(request, response);
         }
     }
 
-    // Handle POST requests for creating a new patient
+    private void handleEditPatient(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Missing patient ID\"}");
+            return;
+        }
+
+        try {
+            int patient_id = Integer.parseInt(idParam.trim());
+            Patient patient = iPatientDAO.selectPatient(patient_id);
+            if (patient != null) {
+                response.getWriter().write(gson.toJson(patient));
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write("{\"error\": \"Patient not found\"}");
+            }
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Invalid patient ID format\"}");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"error\": \"An unexpected error occurred\"}");
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
         String action = request.getParameter("action");
-        StringBuilder jsonBuffer = new StringBuilder();
-        String line;
 
-        try (BufferedReader reader = request.getReader()) {
-            while ((line = reader.readLine()) != null) {
-                jsonBuffer.append(line);
-            }
-        }
-
-        String jsonString = jsonBuffer.toString();
+        String jsonString = getRequestBody(request);
         Patient patient;
 
         try {
             patient = gson.fromJson(jsonString, Patient.class);
+
+            // Validate patient data
+            if (patient.getPatient_name() == null || patient.getPatient_name().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"Patient name is required\"}");
+                return;
+            }
+
             if ("create".equals(action)) {
-                iPatientDAO.insertPatient(patient);
-                response.getWriter().write("{\"message\": \"Patient created successfully\"}");
+                iPatientDAO.insertPatient(patient, patient.getUser_id()); // Use user_id from patient object
+                response.getWriter().write("{\"status\": \"success\", \"message\": \"Patient created successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Invalid action\"}");
@@ -109,7 +106,8 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
-    // Handle PUT requests for updating a patient's details
+
+
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CorsUtil.addCorsHeaders(response);
@@ -131,21 +129,12 @@ public class PatientServlet extends HttpServlet {
             return;
         }
 
-        StringBuilder jsonBuffer = new StringBuilder();
-        String line;
-
-        try (BufferedReader reader = request.getReader()) {
-            while ((line = reader.readLine()) != null) {
-                jsonBuffer.append(line);
-            }
-        }
-
-        String jsonString = jsonBuffer.toString();
+        String jsonString = getRequestBody(request);
         Patient patient;
 
         try {
             patient = gson.fromJson(jsonString, Patient.class);
-            patient.setPatient_id(patient_id); // Keep the original patient ID
+            patient.setPatient_id(patient_id);
 
             if (patient.getPatient_name() == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -164,7 +153,6 @@ public class PatientServlet extends HttpServlet {
         }
     }
 
-    // Handle DELETE requests for removing a patient
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CorsUtil.addCorsHeaders(response);
@@ -195,5 +183,16 @@ public class PatientServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
         }
+    }
+
+    private String getRequestBody(HttpServletRequest request) throws IOException {
+        StringBuilder jsonBuffer = new StringBuilder();
+        String line;
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                jsonBuffer.append(line);
+            }
+        }
+        return jsonBuffer.toString();
     }
 }

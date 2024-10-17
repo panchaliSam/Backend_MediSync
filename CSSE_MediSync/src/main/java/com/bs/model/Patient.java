@@ -10,25 +10,25 @@ public class Patient {
 	private String emergency_contact_no;
 	private String emergency_relation;
 	private String allergy;
-	
-	
-	
-	public Patient() {
-		super();
-	}
+    private int user_id; // Add user_id field
 
-	public Patient(int patient_id, String patient_name, int age, String dob, String contact_no, String emergency_contact_no, String emergency_relation, String allergy) {
-		super();
-		this.patient_id = patient_id;
-		this.patient_name = patient_name;
-		this.age = age;
-		this.dob = dob;
-		this.contact_no = contact_no;
-		this.emergency_contact_no = emergency_contact_no;
-		this.emergency_relation = emergency_relation;
-		this.allergy = allergy;
-	}
+    public Patient() {
+        super();
+    }
 
+    public Patient(int patient_id, String patient_name, int age, String dob, String contact_no, 
+                   String emergency_contact_no, String emergency_relation, String allergy, int user_id) {
+        super();
+        this.patient_id = patient_id;
+        this.patient_name = patient_name;
+        this.age = age;
+        this.dob = dob;
+        this.contact_no = contact_no;
+        this.emergency_contact_no = emergency_contact_no;
+        this.emergency_relation = emergency_relation;
+        this.allergy = allergy;
+        this.setUser_id(user_id); // Initialize user_id
+    }
 	public int getPatient_id() {
 		return patient_id;
 	}
@@ -121,6 +121,14 @@ public class Patient {
 
 	public void setAllergy(String allergy) {
 		this.allergy = allergy;
+	}
+
+	public int getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
 	}
 	
 	

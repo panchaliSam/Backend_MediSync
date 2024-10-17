@@ -16,7 +16,7 @@ public class PatientDAO implements IPatientDAO {
 	
     String SELECT_ALL_PATIENTS = "SELECT * FROM patient";
     
-    String INSERT_PATIENT = "INSERT INTO patient (patient_name, age, dob, contact_no, emergency_contact_no, emergency_relation, allergy) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    String INSERT_PATIENT = "INSERT INTO patient (patient_name, age, dob, contact_no, emergency_contact_no, emergency_relation, allergy, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     
     String UPDATE_PATIENT = "UPDATE patient SET patient_name=?, age=?, dob=?, contact_no=?, emergency_contact_no=?, emergency_relation=?, allergy=? WHERE patient_id = ?";
     
@@ -39,8 +39,9 @@ public class PatientDAO implements IPatientDAO {
                 String emergency_contact_no = rs.getString("emergency_contact_no");
                 String emergency_relation = rs.getString("emergency_relation");
                 String allergy = rs.getString("allergy");
-
-                Patient patient = new Patient(patient_id, patient_name, age, dob, contact_no, emergency_contact_no, emergency_relation, allergy);
+                int user_id = rs.getInt("user_id");
+                
+                Patient patient = new Patient(patient_id, patient_name, age, dob, contact_no, emergency_contact_no, emergency_relation, allergy, user_id);
                 patients.add(patient);
 			}
 		} catch (Exception e) {
@@ -65,8 +66,9 @@ public class PatientDAO implements IPatientDAO {
                     String emergency_contact_no = rs.getString("emergency_contact_no");
                     String emergency_relation = rs.getString("emergency_relation");
                     String allergy = rs.getString("allergy");
+                    int user_id = rs.getInt("user_id");
 
-                    patient = new Patient(patient_id, patient_name, age, dob, contact_no, emergency_contact_no, emergency_relation, allergy);
+                    patient = new Patient(patient_id, patient_name, age, dob, contact_no, emergency_contact_no, emergency_relation, allergy, user_id);
                 }
 			}
 		} catch (Exception e) {
@@ -75,31 +77,29 @@ public class PatientDAO implements IPatientDAO {
 		return patient;
 	}
 	@Override
-	public void insertPatient(Patient patient) {
-		// TODO Auto-generated method stub
-		try (Connection con = DBConnection.getConnection();
-				 PreparedStatement stmt = con.prepareStatement(INSERT_PATIENT)) {
-				
-			stmt.setString(1, patient.getPatient_name());
-            stmt.setInt(2, patient.getAge());
-            stmt.setString(3, patient.getDob());
-            stmt.setString(4, patient.getContact_no());
-            stmt.setString(5, patient.getEmergency_contact_no());
-            stmt.setString(6, patient.getEmergency_relation());
-            stmt.setString(7, patient.getAllergy());
-				
-				stmt.executeUpdate();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+	public void insertPatient(Patient patient, int userId) {
+	    try (Connection con = DBConnection.getConnection();
+	         PreparedStatement stmt = con.prepareStatement(INSERT_PATIENT)) {
+	        stmt.setString(1, patient.getPatient_name());
+	        stmt.setInt(2, patient.getAge());
+	        stmt.setString(3, patient.getDob());
+	        stmt.setString(4, patient.getContact_no());
+	        stmt.setString(5, patient.getEmergency_contact_no());
+	        stmt.setString(6, patient.getEmergency_relation());
+	        stmt.setString(7, patient.getAllergy());
+	        stmt.setInt(8, userId); // Set user_id
+	        stmt.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 	}
-	@Override
-	public void updatePatient(Patient patient) {
-		// TODO Auto-generated method stub
-		try (Connection con = DBConnection.getConnection();
-				 PreparedStatement stmt = con.prepareStatement(UPDATE_PATIENT)) {
-				
-			stmt.setString(1, patient.getPatient_name());
+
+    @Override
+    public void updatePatient(Patient patient) {
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(UPDATE_PATIENT)) {
+
+            stmt.setString(1, patient.getPatient_name());
             stmt.setInt(2, patient.getAge());
             stmt.setString(3, patient.getDob());
             stmt.setString(4, patient.getContact_no());
@@ -107,12 +107,12 @@ public class PatientDAO implements IPatientDAO {
             stmt.setString(6, patient.getEmergency_relation());
             stmt.setString(7, patient.getAllergy());
             stmt.setInt(8, patient.getPatient_id());
-				
-				stmt.executeUpdate();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-	}
+
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 	@Override
 	public void deletePatient(int patient_id) {
 		// TODO Auto-generated method stub
