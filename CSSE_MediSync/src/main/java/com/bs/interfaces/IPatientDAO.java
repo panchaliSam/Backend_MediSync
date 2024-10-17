@@ -13,7 +13,7 @@ public interface IPatientDAO {
 	public Patient selectPatient(int patient_id);
 		
 	//Inserts a new patient record into the database
-	public void insertPatient(Patient patient);
+	public void insertPatient(Patient patient, int userId);
 		
 	//Updates an existing patient record in the database
 	public void updatePatient(Patient patient);

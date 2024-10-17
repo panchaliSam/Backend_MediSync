@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.bs.dao.HospitalDAO;
 import com.bs.interfaces.IHospitalDAO;
+import com.bs.utility.CorsUtil;
 
 /**
  * Servlet implementation class HospitalServlet
@@ -34,6 +35,7 @@ public class HospitalServlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         if (action == null) {
@@ -72,7 +74,8 @@ public class HospitalServlet extends HttpServlet {
      * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
+    	CorsUtil.addCorsHeaders(response);
+    	response.setContentType("application/json");
         String action = request.getParameter("action");
         StringBuilder jsonBuffer = new StringBuilder();
         String line;
@@ -108,7 +111,8 @@ public class HospitalServlet extends HttpServlet {
      * @see HttpServlet#doPut(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
+    	CorsUtil.addCorsHeaders(response);
+    	response.setContentType("application/json");
 
         String hospitalIdParam = request.getParameter("hospital_id");
         if (hospitalIdParam == null) {
@@ -163,7 +167,8 @@ public class HospitalServlet extends HttpServlet {
      * @see HttpServlet#doDelete(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
+    	CorsUtil.addCorsHeaders(response);
+    	response.setContentType("application/json");
         String action = request.getParameter("action");
         String hospitalIDStr = request.getParameter("id");
 

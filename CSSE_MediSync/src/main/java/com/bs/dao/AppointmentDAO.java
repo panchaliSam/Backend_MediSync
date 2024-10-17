@@ -148,18 +148,18 @@ public class AppointmentDAO implements IAppointmentDAO {
 
             // Now that we have the IDs, insert or update the appointment
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
-                stmt.setInt(1, hospitalId);
-                stmt.setInt(2, doctorId);
-                stmt.setInt(3, patientId);
-                stmt.setDate(4, Date.valueOf(appointment.getAppointmentDate()));
-                stmt.setTime(5, Time.valueOf(appointment.getAppointmentTime()));
+                stmt.setInt(1, hospitalId); // Hospital ID
+                stmt.setInt(2, doctorId);   // Doctor ID
+                stmt.setInt(3, patientId);  // Patient ID
+                stmt.setDate(4, Date.valueOf(appointment.getAppointmentDate()));  // Appointment date
+                stmt.setTime(5, Time.valueOf(appointment.getAppointmentTime()));  // Appointment time
 
+                // If this is an update, we need to set the appointment ID as the 6th parameter
                 if (appointmentId > 0) {
-                    // For update operation, we need to set the appointment ID as well
-                    stmt.setInt(6, appointmentId);
+                    stmt.setInt(6, appointmentId);  // Set appointment ID
                 }
 
-                return stmt.executeUpdate() > 0;
+                return stmt.executeUpdate() > 0;  // Execute the update/insert
             }
 
         } catch (SQLException e) {

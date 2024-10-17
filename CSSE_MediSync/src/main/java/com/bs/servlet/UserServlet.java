@@ -16,6 +16,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.SQLException;
+import com.bs.utility.CorsUtil;
 
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
@@ -27,16 +28,9 @@ public class UserServlet extends HttpServlet {
         super();
     }
 
-    private void addCorsHeaders(HttpServletResponse response) {
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-    }
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response);
+        CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         String action = request.getParameter("action");
@@ -96,7 +90,7 @@ public class UserServlet extends HttpServlet {
 
     @Override
     protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        addCorsHeaders(response);
+        CorsUtil.addCorsHeaders(response);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }
