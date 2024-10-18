@@ -113,8 +113,11 @@ public class PatientServlet extends HttpServlet {
         CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
+        // Extract patient_id from the URL parameters or the request body
         String patientIdParam = request.getParameter("patient_id");
-        if (patientIdParam == null) {
+        
+        // Check if patient ID is present
+        if (patientIdParam == null || patientIdParam.trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Missing patient ID\"}");
             return;
@@ -122,26 +125,31 @@ public class PatientServlet extends HttpServlet {
 
         int patient_id;
         try {
-            patient_id = Integer.parseInt(patientIdParam);
+            patient_id = Integer.parseInt(patientIdParam.trim());
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid Patient ID format\"}");
             return;
         }
 
+        // Get the JSON body from the request
         String jsonString = getRequestBody(request);
         Patient patient;
 
         try {
             patient = gson.fromJson(jsonString, Patient.class);
+            
+            // Set the patient ID on the patient object
             patient.setPatient_id(patient_id);
 
-            if (patient.getPatient_name() == null) {
+            // Validate required fields
+            if (patient.getPatient_name() == null || patient.getPatient_name().trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Missing required fields\"}");
                 return;
             }
 
+            // Update the patient in the database
             iPatientDAO.updatePatient(patient);
             response.getWriter().write("{\"message\": \"Patient updated successfully\"}");
         } catch (JsonSyntaxException e) {
@@ -152,6 +160,7 @@ public class PatientServlet extends HttpServlet {
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
         }
     }
+
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
