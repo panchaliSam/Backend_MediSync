@@ -65,8 +65,12 @@ public class UserServlet extends HttpServlet {
             User user = new User(username, hashedPassword);
 
             try {
-                iUserDAO.registerUser(user);
-                response.getWriter().write("{\"message\": \"User registered successfully\"}");
+                // Call registerUser and get the generated user ID
+                int userId = iUserDAO.registerUser(user);
+                JsonObject responseJson = new JsonObject();
+                responseJson.addProperty("message", "User registered successfully");
+                responseJson.addProperty("userId", userId); // Include user ID in the response
+                response.getWriter().write(responseJson.toString());
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().write("{\"error\": \"Error registering user: " + e.getMessage() + "\"}");
@@ -76,7 +80,11 @@ public class UserServlet extends HttpServlet {
             try {
                 User user = iUserDAO.loginUser(username, password);
                 if (user != null) {
-                    response.getWriter().write(gson.toJson(user));
+                    JsonObject responseJson = new JsonObject();
+                    responseJson.addProperty("message", "Login successful");
+                    responseJson.addProperty("userId", user.getUserId()); // Include user ID
+                    responseJson.addProperty("username", user.getUsername()); // Optionally include username
+                    response.getWriter().write(responseJson.toString());
                 } else {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("{\"error\": \"Invalid username or password\"}");
@@ -88,10 +96,10 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+
     @Override
     protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CorsUtil.addCorsHeaders(response);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }
-

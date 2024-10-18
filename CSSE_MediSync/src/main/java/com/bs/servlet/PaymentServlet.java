@@ -26,62 +26,64 @@ public class PaymentServlet extends HttpServlet {
         super();
     }
 
-    // Handle GET requests (view all or specific payment)
+    @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CorsUtil.addCorsHeaders(response);
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
 
         if (action == null) {
-            // Return all payments if no specific action
             List<Payment> payments = iPaymentDAO.selectAllPayments();
             response.getWriter().write(gson.toJson(payments));
         } else if ("view".equals(action)) {
-            String idParam = request.getParameter("id");
-            if (idParam == null || idParam.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Missing payment ID\"}");
-                return;
-            }
-
-            try {
-                int payment_id = Integer.parseInt(idParam.trim());
-                Payment payment = iPaymentDAO.selectPayment(payment_id);
-                if (payment != null) {
-                    response.getWriter().write(gson.toJson(payment));
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().write("{\"error\": \"Payment not found\"}");
-                }
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Invalid payment ID format\"}");
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("{\"error\": \"An unexpected error occurred\"}");
-            }
+            handleViewPayment(request, response);
         }
     }
 
-    // Handle POST requests (create new payment)
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	CorsUtil.addCorsHeaders(response);
-    	response.setContentType("application/json");
-        String action = request.getParameter("action");
-        StringBuilder jsonBuffer = new StringBuilder();
-        String line;
-
-        try (BufferedReader reader = request.getReader()) {
-            while ((line = reader.readLine()) != null) {
-                jsonBuffer.append(line);
-            }
+    private void handleViewPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Missing payment ID\"}");
+            return;
         }
 
-        String jsonString = jsonBuffer.toString();
+        try {
+            int payment_id = Integer.parseInt(idParam.trim());
+            Payment payment = iPaymentDAO.selectPayment(payment_id);
+            if (payment != null) {
+                response.getWriter().write(gson.toJson(payment));
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write("{\"error\": \"Payment not found\"}");
+            }
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Invalid payment ID format\"}");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"error\": \"An unexpected error occurred\"}");
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CorsUtil.addCorsHeaders(response);
+        response.setContentType("application/json");
+        String action = request.getParameter("action");
+
+        String jsonString = getRequestBody(request);
         Payment payment;
 
         try {
             payment = gson.fromJson(jsonString, Payment.class);
+
             if ("create".equals(action)) {
                 iPaymentDAO.insertPayment(payment);
                 response.getWriter().write("{\"message\": \"Payment created successfully\"}");
@@ -98,13 +100,13 @@ public class PaymentServlet extends HttpServlet {
         }
     }
 
-    // Handle PUT requests (update existing payment)
+    @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	CorsUtil.addCorsHeaders(response);
-    	response.setContentType("application/json");
+        CorsUtil.addCorsHeaders(response);
+        response.setContentType("application/json");
 
         String paymentIdParam = request.getParameter("payment_id");
-        if (paymentIdParam == null) {
+        if (paymentIdParam == null || paymentIdParam.trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Missing payment ID\"}");
             return;
@@ -112,16 +114,7 @@ public class PaymentServlet extends HttpServlet {
 
         try {
             int payment_id = Integer.parseInt(paymentIdParam.trim());
-            StringBuilder jsonBuffer = new StringBuilder();
-            String line;
-
-            try (BufferedReader reader = request.getReader()) {
-                while ((line = reader.readLine()) != null) {
-                    jsonBuffer.append(line);
-                }
-            }
-
-            String jsonString = jsonBuffer.toString();
+            String jsonString = getRequestBody(request);
             Payment payment = gson.fromJson(jsonString, Payment.class);
             payment.setPayment_id(payment_id); // Keep the original payment ID
 
@@ -145,10 +138,10 @@ public class PaymentServlet extends HttpServlet {
         }
     }
 
-    // Handle DELETE requests (delete payment)
+    @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	CorsUtil.addCorsHeaders(response);
-    	response.setContentType("application/json");
+        CorsUtil.addCorsHeaders(response);
+        response.setContentType("application/json");
         String action = request.getParameter("action");
         String paymentIDStr = request.getParameter("id");
 
@@ -175,5 +168,16 @@ public class PaymentServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
         }
+    }
+
+    private String getRequestBody(HttpServletRequest request) throws IOException {
+        StringBuilder jsonBuffer = new StringBuilder();
+        String line;
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                jsonBuffer.append(line);
+            }
+        }
+        return jsonBuffer.toString();
     }
 }

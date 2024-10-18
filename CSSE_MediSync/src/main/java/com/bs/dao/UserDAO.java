@@ -18,12 +18,21 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void registerUser(User user) throws SQLException {
+    public int registerUser(User user) throws SQLException {
         String sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPasswordHash());
             ps.executeUpdate();
+
+            // Retrieve generated keys (user ID)
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1); // Return the generated user ID
+                } else {
+                    throw new SQLException("Registration failed, no ID obtained.");
+                }
+            }
         }
     }
 

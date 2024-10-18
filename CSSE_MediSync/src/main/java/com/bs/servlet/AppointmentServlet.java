@@ -81,15 +81,22 @@ public class AppointmentServlet extends HttpServlet {
             response.setStatus(isCreated ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"message\": \"Appointment created successfully.\"}");
         } catch (SQLException e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"error\": \"SQL error: " + e.getMessage() + "\"}");
+            // Check for specific message about existing appointment
+            if (e.getMessage().contains("An appointment already exists")) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
+                response.getWriter().write("{\"error\": \"An appointment already exists for this patient with the same doctor on this date.\"}");
+            } else {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"error\": \"SQL error: " + e.getMessage() + "\"}");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An unexpected error occurred: " + e.getMessage() + "\"}");
         }
     }
+
 
 
     @Override
