@@ -72,6 +72,35 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL  -- Store hashed passwords for security
 );
 
+CREATE TABLE doctor_availability (
+    availability_id INT AUTO_INCREMENT PRIMARY KEY,
+    doctor_id INT,
+    hospital_id INT,
+    available_date DATE NOT NULL,
+    start_time TIME,
+    end_time TIME,
+    is_available BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id),
+    FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id)
+);
+
+ALTER TABLE doctor_availability 
+MODIFY COLUMN is_available BOOLEAN DEFAULT TRUE;
+
+
+ALTER TABLE patient
+ADD COLUMN user_id INT;  -- Change INT to the appropriate data type based on your user table's primary key
+
+ALTER TABLE patient
+ADD CONSTRAINT fk_user
+FOREIGN KEY (user_id) REFERENCES users(user_id);  -- Change user_id to the appropriate primary key column in the user table
+
+ALTER TABLE hospital
+ADD COLUMN user_id INT;  -- Change INT to the appropriate data type based on your user table's primary key
+
+ALTER TABLE hospital
+ADD CONSTRAINT fk_user_hospital
+FOREIGN KEY (user_id) REFERENCES users(user_id);  -- Change user_id to the appropriate primary key column in the user table
 
 
 
@@ -92,3 +121,22 @@ INNER JOIN hospital h ON h.hospital_id = a.hospital_id
 INNER JOIN doctor d ON d.doctor_id = a.doctor_id
 INNER JOIN patient p ON p.patient_id = a.patient_id
 INNER JOIN payment pay ON pay.payment_id = a.payment_id;
+
+
+SELECT d.doctor_name, 
+       da.available_date, 
+       h.hospital_name, 
+       da.start_time, 
+       da.end_time, 
+       COUNT(a.appointment_id) AS allocated_patients
+FROM doctor_availability da
+JOIN doctor d ON da.doctor_id = d.doctor_id
+JOIN hospital h ON da.hospital_id = h.hospital_id
+LEFT JOIN appointment a 
+    ON da.doctor_id = a.doctor_id 
+    AND da.available_date = a.appointment_date 
+    AND da.hospital_id = a.hospital_id
+WHERE d.doctor_name = 'Dr. Anura Silva'  -- Replace with the selected doctor name
+AND da.is_available = TRUE
+GROUP BY d.doctor_name, da.available_date, h.hospital_name, da.start_time, da.end_time
+ORDER BY da.available_date, da.start_time;
