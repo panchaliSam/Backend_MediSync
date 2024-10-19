@@ -8,19 +8,53 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
             padding: 0;
-            text-align: center; /* Center align text */
+            background-color: #f0f4f8; /* Light background for contrast */
+            color: #333; /* Text color */
         }
         h1 {
-            margin-bottom: 20px;
+            background-color: #1e40af; /* Primary color: bg-blue-600 (Dark blue) */
+            color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 2.5em;
         }
         .content {
-            margin: 20px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 800px;
+            background-color: white; /* Clean white card style */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow */
+            border-radius: 8px;
+            border-left: 4px solid #1e40af; /* Border using primary color */
+        }
+        h2 {
+            font-size: 1.75em;
+            color: #1e40af; /* Primary color for section titles */
+        }
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin: 10px 0;
+            color: #555; /* Softer text color for paragraphs */
+        }
+        /* Adding responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+                padding: 15px;
+            }
+            .content {
+                padding: 15px;
+                margin: 15px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            p {
+                font-size: 1em;
+            }
         }
     </style>
 </head>

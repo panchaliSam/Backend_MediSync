@@ -3,6 +3,7 @@ package com.bs.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,11 +112,18 @@ public class DoctorDAO implements IDoctorDAO {
 
     @Override
     public void insertDoctor(Doctor doctor) {
+        // Get the hospital ID based on the provided hospital name
         int hospitalId = getHospitalIdByName(doctor.getHospital_name());
         if (hospitalId == -1) {
             throw new IllegalArgumentException("Hospital name does not exist: " + doctor.getHospital_name());
         }
-        
+
+        // Check if the doctor with the same name already exists
+        if (isDoctorNameExists(doctor.getDoctor_name())) {
+            throw new IllegalArgumentException("Doctor with the name " + doctor.getDoctor_name() + " already exists.");
+        }
+
+        // Insert the doctor into the database
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(INSERT_DOCTOR)) {
 
@@ -126,16 +134,23 @@ public class DoctorDAO implements IDoctorDAO {
             stmt.setDouble(5, doctor.getDoctor_charge());
 
             stmt.executeUpdate();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Failed to insert doctor: " + e.getMessage());
         }
     }
 
     @Override
     public void updateDoctor(Doctor doctor) {
+        // Validate the hospital name first
         int hospitalId = getHospitalIdByName(doctor.getHospital_name());
         if (hospitalId == -1) {
             throw new IllegalArgumentException("Hospital name does not exist: " + doctor.getHospital_name());
+        }
+
+        // Check if the doctor exists
+        if (!doctorExists(doctor.getDoctor_id())) {
+            throw new IllegalArgumentException("Doctor with ID " + doctor.getDoctor_id() + " does not exist.");
         }
 
         try (Connection con = DBConnection.getConnection();
@@ -164,5 +179,39 @@ public class DoctorDAO implements IDoctorDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+ // Helper method to check if a doctor name already exists
+    private boolean isDoctorNameExists(String doctorName) {
+        String query = "SELECT COUNT(*) FROM doctors WHERE doctor_name = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setString(1, doctorName);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Returns true if a doctor with the given name exists
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Returns false if no doctor with the name exists
+    }
+    
+ // Method to check if a doctor exists
+    private boolean doctorExists(int doctorId) {
+        String query = "SELECT COUNT(*) FROM doctor WHERE doctor_id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(query)) {
+
+            stmt.setInt(1, doctorId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Return true if count is greater than 0
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Return false if any exception occurs or doctor doesn't exist
     }
 }

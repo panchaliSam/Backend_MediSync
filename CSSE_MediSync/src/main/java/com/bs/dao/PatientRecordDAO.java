@@ -90,7 +90,7 @@ public class PatientRecordDAO implements IPatientRecordDAO{
     }
 
     // Insert a New Patient Record
-    public void insertPatientRecord(PatientRecord patientRecord) {
+    public int insertPatientRecord(PatientRecord patientRecord) {
         // Validate existence of names and map to IDs
         int patientId = getPatientIdByName(patientRecord.getPatient_name());
         int hospitalId = getHospitalIdByName(patientRecord.getHospital_name());
@@ -115,6 +115,7 @@ public class PatientRecordDAO implements IPatientRecordDAO{
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return -1;
     }
 
     // Update an Existing Patient Record

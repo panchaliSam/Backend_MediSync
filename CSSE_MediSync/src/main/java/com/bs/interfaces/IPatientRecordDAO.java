@@ -6,7 +6,7 @@ import com.bs.model.PatientRecord;
 
 public interface IPatientRecordDAO {
 	
-	void insertPatientRecord(PatientRecord patientRecord);
+	int insertPatientRecord(PatientRecord patientRecord);
 	
     List<PatientRecord> selectAllPatientRecords();
     
