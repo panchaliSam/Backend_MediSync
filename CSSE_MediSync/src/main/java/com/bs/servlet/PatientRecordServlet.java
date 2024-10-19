@@ -132,16 +132,16 @@ public class PatientRecordServlet extends HttpServlet {
             record = gson.fromJson(jsonString, PatientRecord.class);
             record.setRecord_id(record_id);
 
-            int record_id = Integer.parseInt(recordIdParam.trim());
-            String jsonString = getRequestBody(request);
-            PatientRecord record = gson.fromJson(jsonString, PatientRecord.class);
-            record.setRecord_id(record_id); // Keep the original record ID
+//            int record_id = Integer.parseInt(recordIdParam.trim());
+//            String jsonString = getRequestBody(request);
+//            PatientRecord record = gson.fromJson(jsonString, PatientRecord.class);
+//            record.setRecord_id(record_id); // Keep the original record ID
 
-//             if (record.getDiagnosis() == null) {
-//                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-//                 response.getWriter().write("{\"error\": \"Missing required fields\"}");
-//                 return;
-//             }
+             if (record.getDiagnosis() == null) {
+                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                 response.getWriter().write("{\"error\": \"Missing required fields\"}");
+                 return;
+             }
 
             iPatientRecordDAO.updatePatientRecord(record);
             response.getWriter().write("{\"message\": \"Patient record updated successfully\"}");

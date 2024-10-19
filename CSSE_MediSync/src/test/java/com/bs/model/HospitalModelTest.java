@@ -8,7 +8,7 @@ class HospitalModelTest {
     // Positive Test Case: Test Hospital Object Creation with Valid Data
     @Test
     void testHospitalObjectCreation() {
-        Hospital hospital = new Hospital(1, "General Hospital", 5000.0);
+        Hospital hospital = new Hospital(1, "General Hospital", 5000.0,7);
 
         // Assert values are set correctly
         assertEquals(1, hospital.getHospital_id(), "Hospital ID should be set correctly");
