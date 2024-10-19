@@ -17,4 +17,6 @@ public interface IAppointmentDAO {
     
     // Delete an appointment by ID
     boolean deleteAppointment(int appointmentId) throws SQLException;
+    
+    boolean isAppointmentExists(Appointment appointment) throws SQLException;
 }

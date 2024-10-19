@@ -4,16 +4,18 @@ public class Hospital {
 	private int hospital_id;
 	private String hospital_name;
 	private double hospital_charge;
+	private int user_id;
 	
 	public Hospital() {
 		super();
 	}
 
-	public Hospital(int hospital_id, String hospital_name, double hospital_charge) {
+	public Hospital(int hospital_id, String hospital_name, double hospital_charge, int user_id) {
 		super();
 		this.hospital_id = hospital_id;
 		this.hospital_name = hospital_name;
 		this.hospital_charge = hospital_charge;
+		this.user_id = user_id;
 	}
 	
 	public int getHospital_id() {
@@ -33,5 +35,13 @@ public class Hospital {
 	}
 	public void setHospital_charge(double hospital_charge) {
 		this.hospital_charge = hospital_charge;
+	}
+
+	public int getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
 	}
 }

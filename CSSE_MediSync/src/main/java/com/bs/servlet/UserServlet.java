@@ -10,8 +10,9 @@ import com.bs.dao.UserDAO;
 import com.bs.interfaces.IUserDAO;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 import org.mindrot.jbcrypt.BCrypt;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +24,9 @@ public class UserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private IUserDAO iUserDAO = new UserDAO();
     private Gson gson = new Gson();
+
+    // Use your provided secret key
+    private static final String SECRET_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 
     public UserServlet() {
         super();
@@ -65,8 +69,12 @@ public class UserServlet extends HttpServlet {
             User user = new User(username, hashedPassword);
 
             try {
-                iUserDAO.registerUser(user);
-                response.getWriter().write("{\"message\": \"User registered successfully\"}");
+                // Call registerUser and get the generated user ID
+                int userId = iUserDAO.registerUser(user);
+                JsonObject responseJson = new JsonObject();
+                responseJson.addProperty("message", "User registered successfully");
+                responseJson.addProperty("userId", userId); // Include user ID in the response
+                response.getWriter().write(responseJson.toString());
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().write("{\"error\": \"Error registering user: " + e.getMessage() + "\"}");
@@ -76,7 +84,15 @@ public class UserServlet extends HttpServlet {
             try {
                 User user = iUserDAO.loginUser(username, password);
                 if (user != null) {
-                    response.getWriter().write(gson.toJson(user));
+                    // Generate JWT Token
+                    String jwtToken = generateToken(user.getUsername());
+
+                    JsonObject responseJson = new JsonObject();
+                    responseJson.addProperty("message", "Login successful");
+                    responseJson.addProperty("userId", user.getUserId()); // Include user ID
+                    responseJson.addProperty("username", user.getUsername()); // Optionally include username
+                    responseJson.addProperty("token", jwtToken); // Include JWT token
+                    response.getWriter().write(responseJson.toString());
                 } else {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("{\"error\": \"Invalid username or password\"}");
@@ -89,9 +105,53 @@ public class UserServlet extends HttpServlet {
     }
 
     @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CorsUtil.addCorsHeaders(response);
+        response.setContentType("application/json");
+
+        // Extract token from Authorization header
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+
+            // Validate the token
+            if (validateToken(token)) {
+                // Token is valid, proceed with your logic here
+                response.getWriter().write("{\"message\": \"Token is valid\"}");
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Invalid token\"}");
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Authorization header is missing\"}");
+        }
+    }
+
+    
+    // Method to generate JWT Token
+    private String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+
+    // Method to validate JWT Token (optional)
+    private boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                .setSigningKey(SECRET_KEY)
+                .parseClaimsJws(token);
+            return true; // Token is valid
+        } catch (Exception e) {
+            return false; // Invalid token
+        }
+    }
+
+    @Override
     protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CorsUtil.addCorsHeaders(response);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }
-

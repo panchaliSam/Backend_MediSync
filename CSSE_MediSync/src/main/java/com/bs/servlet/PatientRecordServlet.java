@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import com.bs.model.PatientRecord;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.io.BufferedReader;
@@ -81,14 +82,12 @@ public class PatientRecordServlet extends HttpServlet {
         PatientRecord record;
 
         try {
-            record = gson.fromJson(jsonString, PatientRecord.class);
-
+            record = gson.fromJson(jsonString, PatientRecord.class);          
             if (record.getPatient_name() == null || record.getPatient_name().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Patient name is required\"}");
                 return;
             }
-
             if ("create".equals(action)) {
                 iPatientRecordDAO.insertPatientRecord(record);
                 response.getWriter().write("{\"status\": \"success\", \"message\": \"Patient record created successfully\"}");
@@ -111,7 +110,7 @@ public class PatientRecordServlet extends HttpServlet {
         response.setContentType("application/json");
 
         String recordIdParam = request.getParameter("record_id");
-        if (recordIdParam == null) {
+        if (recordIdParam == null || recordIdParam.trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Missing record ID\"}");
             return;
@@ -133,14 +132,22 @@ public class PatientRecordServlet extends HttpServlet {
             record = gson.fromJson(jsonString, PatientRecord.class);
             record.setRecord_id(record_id);
 
-            if (record.getDiagnosis() == null) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Missing required fields\"}");
-                return;
-            }
+            int record_id = Integer.parseInt(recordIdParam.trim());
+            String jsonString = getRequestBody(request);
+            PatientRecord record = gson.fromJson(jsonString, PatientRecord.class);
+            record.setRecord_id(record_id); // Keep the original record ID
+
+//             if (record.getDiagnosis() == null) {
+//                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//                 response.getWriter().write("{\"error\": \"Missing required fields\"}");
+//                 return;
+//             }
 
             iPatientRecordDAO.updatePatientRecord(record);
             response.getWriter().write("{\"message\": \"Patient record updated successfully\"}");
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Invalid record ID format\"}");
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid JSON format\"}");
@@ -186,7 +193,6 @@ public class PatientRecordServlet extends HttpServlet {
     private String getRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder jsonBuffer = new StringBuilder();
         String line;
-
         try (BufferedReader reader = request.getReader()) {
             while ((line = reader.readLine()) != null) {
                 jsonBuffer.append(line);

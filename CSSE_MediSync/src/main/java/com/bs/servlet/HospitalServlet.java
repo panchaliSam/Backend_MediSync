@@ -9,13 +9,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.bs.model.Hospital;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.List;
 import com.bs.dao.HospitalDAO;
 import com.bs.interfaces.IHospitalDAO;
 import com.bs.utility.CorsUtil;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/hospitals")
 public class HospitalServlet extends HttpServlet {
@@ -90,9 +90,8 @@ public class HospitalServlet extends HttpServlet {
                 response.getWriter().write("{\"error\": \"Hospital name is required\"}");
                 return;
             }
-
             if ("create".equals(action)) {
-                iHospitalDAO.insertHospital(hospital);
+                iHospitalDAO.insertHospital(hospital, hospital.getUser_id());
                 response.getWriter().write("{\"message\": \"Hospital created successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -114,7 +113,7 @@ public class HospitalServlet extends HttpServlet {
         response.setContentType("application/json");
 
         String hospitalIdParam = request.getParameter("hospital_id");
-        if (hospitalIdParam == null) {
+        if (hospitalIdParam == null || hospitalIdParam.trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Missing hospital ID\"}");
             return;
@@ -122,7 +121,7 @@ public class HospitalServlet extends HttpServlet {
 
         int hospital_id;
         try {
-            hospital_id = Integer.parseInt(hospitalIdParam);
+            hospital_id = Integer.parseInt(hospitalIdParam.trim());
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid Hospital ID format\"}");
@@ -136,7 +135,7 @@ public class HospitalServlet extends HttpServlet {
             hospital = gson.fromJson(jsonString, Hospital.class);
             hospital.setHospital_id(hospital_id);
 
-            if (hospital.getHospital_name() == null || hospital.getHospital_name().isEmpty()) {
+            if (hospital.getHospital_name() == null || hospital.getHospital_name().trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Hospital name is required\"}");
                 return;

@@ -15,7 +15,7 @@ public class HospitalDAO implements IHospitalDAO {
     // SQL Queries for Hospital operations
     String SELECT_HOSPITAL_BY_ID = "SELECT * FROM hospital WHERE hospital_id = ?";
     String SELECT_ALL_HOSPITALS = "SELECT * FROM hospital";
-    String INSERT_HOSPITAL = "INSERT INTO hospital (hospital_name, hospital_charge) VALUES (?, ?)";
+    String INSERT_HOSPITAL = "INSERT INTO hospital (hospital_name, hospital_charge, user_id) VALUES (?, ?, ?)";
     String UPDATE_HOSPITAL = "UPDATE hospital SET hospital_name=?, hospital_charge=? WHERE hospital_id = ?";
     String DELETE_HOSPITAL = "DELETE FROM hospital WHERE hospital_id = ?";
     String CHECK_HOSPITAL_NAME_EXISTS = "SELECT COUNT(*) FROM hospital WHERE hospital_name = ? AND hospital_id != ?";
@@ -48,8 +48,9 @@ public class HospitalDAO implements IHospitalDAO {
                 int hospital_id = rs.getInt("hospital_id");
                 String hospital_name = rs.getString("hospital_name");
                 double hospital_charge = rs.getDouble("hospital_charge");
+                int user_id = rs.getInt("user_id");
 
-                Hospital hospital = new Hospital(hospital_id, hospital_name, hospital_charge);
+                Hospital hospital = new Hospital(hospital_id, hospital_name, hospital_charge, user_id);
                 hospitals.add(hospital);
             }
         } catch (Exception e) {
@@ -69,8 +70,9 @@ public class HospitalDAO implements IHospitalDAO {
                 if (rs.next()) {
                     String hospital_name = rs.getString("hospital_name");
                     double hospital_charge = rs.getDouble("hospital_charge");
+                    int user_id = rs.getInt("user_id");
 
-                    hospital = new Hospital(hospital_id, hospital_name, hospital_charge);
+                    hospital = new Hospital(hospital_id, hospital_name, hospital_charge, user_id);
                 }
             }
         } catch (Exception e) {
@@ -80,7 +82,7 @@ public class HospitalDAO implements IHospitalDAO {
     }
 
     @Override
-    public void insertHospital(Hospital hospital) {
+    public void insertHospital(Hospital hospital, int userId) {
         try {
             // Validate uniqueness of hospital name
             if (!isHospitalNameUnique(hospital.getHospital_name(), -1)) { // -1 means this is a new hospital
@@ -92,6 +94,7 @@ public class HospitalDAO implements IHospitalDAO {
 
                 stmt.setString(1, hospital.getHospital_name());
                 stmt.setDouble(2, hospital.getHospital_charge());
+                stmt.setInt(3, userId); 
 
                 stmt.executeUpdate();
             }

@@ -87,7 +87,7 @@ public class PatientDAO implements IPatientDAO {
 	        stmt.setString(5, patient.getEmergency_contact_no());
 	        stmt.setString(6, patient.getEmergency_relation());
 	        stmt.setString(7, patient.getAllergy());
-	        stmt.setInt(8, userId); // Set user_id
+	        stmt.setInt(8, userId); 
 	        stmt.executeUpdate();
 	    } catch (Exception e) {
 	        e.printStackTrace();

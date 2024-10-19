@@ -78,6 +78,9 @@ public class AppointmentDAO implements IAppointmentDAO {
     // Insert an appointment by retrieving relevant IDs
     @Override
     public boolean createAppointment(Appointment appointment) throws SQLException {
+        if (isAppointmentExists(appointment)) {
+            throw new SQLException("An appointment already exists for this patient with the same doctor on this date.");
+        }
         return executeAppointmentOperation(appointment, INSERT_APPOINTMENT, 0);
     }
 
@@ -166,4 +169,29 @@ public class AppointmentDAO implements IAppointmentDAO {
             throw new SQLException("Error processing appointment: " + e.getMessage(), e);
         }
     }
+    
+    @Override
+    public boolean isAppointmentExists(Appointment appointment) throws SQLException {
+        String query = "SELECT COUNT(*) FROM appointment WHERE appointment_date = ? " +
+                       "AND patient_id = (SELECT patient_id FROM patient WHERE patient_name = ?) " +
+                       "AND doctor_id = (SELECT doctor_id FROM doctor WHERE doctor_name = ?) " +
+                       "AND hospital_id = (SELECT hospital_id FROM hospital WHERE hospital_name = ?)";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setDate(1, Date.valueOf(appointment.getAppointmentDate()));
+            stmt.setString(2, appointment.getPatientName());
+            stmt.setString(3, appointment.getDoctorName());
+            stmt.setString(4, appointment.getHospitalName());
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Return true if any existing appointment is found
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error checking existing appointment: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
 }

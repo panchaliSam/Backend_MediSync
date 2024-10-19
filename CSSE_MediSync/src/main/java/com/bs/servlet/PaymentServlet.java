@@ -39,7 +39,6 @@ public class PaymentServlet extends HttpServlet {
         response.setContentType("application/json");
 
         if (action == null) {
-            // Return all payments if no specific action
             List<Payment> payments = iPaymentDAO.selectAllPayments();
             response.getWriter().write(gson.toJson(payments));
         } else if ("view".equals(action)) {
@@ -91,7 +90,6 @@ public class PaymentServlet extends HttpServlet {
                 response.getWriter().write("{\"error\": \"Payment date is required\"}");
                 return;
             }
-
             if ("create".equals(action)) {
                 iPaymentDAO.insertPayment(payment);
                 response.getWriter().write("{\"status\": \"success\", \"message\": \"Payment created successfully\"}");
@@ -114,7 +112,7 @@ public class PaymentServlet extends HttpServlet {
         response.setContentType("application/json");
 
         String paymentIdParam = request.getParameter("payment_id");
-        if (paymentIdParam == null) {
+        if (paymentIdParam == null || paymentIdParam.trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Missing payment ID\"}");
             return;
@@ -134,6 +132,10 @@ public class PaymentServlet extends HttpServlet {
 
         try {
             payment = gson.fromJson(jsonString, Payment.class);
+//             int payment_id = Integer.parseInt(paymentIdParam.trim());
+//             String jsonString = getRequestBody(request);
+//             Payment payment = gson.fromJson(jsonString, Payment.class);
+
             payment.setPayment_id(payment_id); // Keep the original payment ID
 
             if (payment.getPayment_date() == null) {
@@ -188,7 +190,7 @@ public class PaymentServlet extends HttpServlet {
     private String getRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder jsonBuffer = new StringBuilder();
         String line;
-
+      
         try (BufferedReader reader = request.getReader()) {
             while ((line = reader.readLine()) != null) {
                 jsonBuffer.append(line);

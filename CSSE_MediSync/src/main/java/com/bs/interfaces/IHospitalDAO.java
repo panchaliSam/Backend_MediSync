@@ -13,7 +13,7 @@ public interface IHospitalDAO {
 		public Hospital selectHospital(int hospital_id);
 			
 		//Inserts a new hospital record into the database
-		public void insertHospital(Hospital hospital);
+		public void insertHospital(Hospital hospital, int userId);
 			
 		//Updates an existing hospital record in the database
 		public void updateHospital(Hospital hospital);
