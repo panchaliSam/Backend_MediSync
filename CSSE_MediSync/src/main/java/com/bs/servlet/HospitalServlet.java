@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import com.bs.model.Hospital;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -15,11 +16,12 @@ import com.bs.dao.HospitalDAO;
 import com.bs.interfaces.IHospitalDAO;
 import com.bs.utility.CorsUtil;
 
+
 @WebServlet("/hospitals")
 public class HospitalServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private IHospitalDAO iHospitalDAO = new HospitalDAO();
-    private Gson gson = new Gson();
+    private Gson gson = new Gson(); 
 
     public HospitalServlet() {
         super();
@@ -83,6 +85,11 @@ public class HospitalServlet extends HttpServlet {
         try {
             hospital = gson.fromJson(jsonString, Hospital.class);
 
+            if (hospital.getHospital_name() == null || hospital.getHospital_name().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"Hospital name is required\"}");
+                return;
+            }
             if ("create".equals(action)) {
                 iHospitalDAO.insertHospital(hospital, hospital.getUser_id());
                 response.getWriter().write("{\"message\": \"Hospital created successfully\"}");
@@ -94,6 +101,7 @@ public class HospitalServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid JSON format\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
         }
@@ -129,7 +137,7 @@ public class HospitalServlet extends HttpServlet {
 
             if (hospital.getHospital_name() == null || hospital.getHospital_name().trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Missing required fields\"}");
+                response.getWriter().write("{\"error\": \"Hospital name is required\"}");
                 return;
             }
 
@@ -139,6 +147,7 @@ public class HospitalServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid JSON format\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
         }
@@ -171,6 +180,7 @@ public class HospitalServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid Hospital ID format\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"An error occurred: " + e.getMessage() + "\"}");
         }

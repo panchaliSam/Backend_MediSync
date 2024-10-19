@@ -19,8 +19,8 @@ import com.bs.utility.CorsUtil;
 @WebServlet("/payments")
 public class PaymentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private IPaymentDAO iPaymentDAO = new PaymentDAO();
-    private Gson gson = new Gson(); 
+    public IPaymentDAO iPaymentDAO = new PaymentDAO();
+    private Gson gson = new Gson();
 
     public PaymentServlet() {
         super();
@@ -84,9 +84,15 @@ public class PaymentServlet extends HttpServlet {
         try {
             payment = gson.fromJson(jsonString, Payment.class);
 
+            // Validate payment data (you can add more validation as needed)
+            if (payment.getPayment_date() == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"Payment date is required\"}");
+                return;
+            }
             if ("create".equals(action)) {
                 iPaymentDAO.insertPayment(payment);
-                response.getWriter().write("{\"message\": \"Payment created successfully\"}");
+                response.getWriter().write("{\"status\": \"success\", \"message\": \"Payment created successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Invalid action\"}");
@@ -112,10 +118,24 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
+        int payment_id;
         try {
-            int payment_id = Integer.parseInt(paymentIdParam.trim());
-            String jsonString = getRequestBody(request);
-            Payment payment = gson.fromJson(jsonString, Payment.class);
+            payment_id = Integer.parseInt(paymentIdParam);
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Invalid payment ID format\"}");
+            return;
+        }
+
+        String jsonString = getRequestBody(request);
+        Payment payment;
+
+        try {
+            payment = gson.fromJson(jsonString, Payment.class);
+//             int payment_id = Integer.parseInt(paymentIdParam.trim());
+//             String jsonString = getRequestBody(request);
+//             Payment payment = gson.fromJson(jsonString, Payment.class);
+
             payment.setPayment_id(payment_id); // Keep the original payment ID
 
             if (payment.getPayment_date() == null) {
@@ -126,9 +146,6 @@ public class PaymentServlet extends HttpServlet {
 
             iPaymentDAO.updatePayment(payment);
             response.getWriter().write("{\"message\": \"Payment updated successfully\"}");
-        } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Invalid payment ID format\"}");
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid JSON format\"}");
@@ -173,11 +190,13 @@ public class PaymentServlet extends HttpServlet {
     private String getRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder jsonBuffer = new StringBuilder();
         String line;
+      
         try (BufferedReader reader = request.getReader()) {
             while ((line = reader.readLine()) != null) {
                 jsonBuffer.append(line);
             }
         }
+
         return jsonBuffer.toString();
     }
 }

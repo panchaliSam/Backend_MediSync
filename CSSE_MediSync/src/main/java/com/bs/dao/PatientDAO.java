@@ -52,7 +52,7 @@ public class PatientDAO implements IPatientDAO {
 	@Override
 	public Patient selectPatient(int patient_id) {
 		// TODO Auto-generated method stub
-		Patient patient = new Patient();
+		Patient patient = null;;
 		try (Connection con = DBConnection.getConnection();
 			 PreparedStatement stmt = con.prepareStatement(SELECT_PATIENT_BY_ID)) {
 			

@@ -12,7 +12,7 @@ public interface IPaymentDAO {
 
     Payment selectPayment(int payment_id);
 
-    void updatePayment(Payment payment);
+    boolean updatePayment(Payment payment);
 
     void deletePayment(int payment_id);
 }

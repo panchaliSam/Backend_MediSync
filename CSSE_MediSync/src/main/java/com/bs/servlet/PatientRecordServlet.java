@@ -6,14 +6,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import com.bs.model.PatientRecord;
-import com.bs.dao.PatientRecordDAO;
-import com.bs.interfaces.IPatientRecordDAO;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
+import com.bs.dao.PatientRecordDAO;
+import com.bs.interfaces.IPatientRecordDAO;
 import com.bs.utility.CorsUtil;
 
 @WebServlet("/patientRecords")
@@ -41,12 +41,12 @@ public class PatientRecordServlet extends HttpServlet {
         if (action == null) {
             List<PatientRecord> records = iPatientRecordDAO.selectAllPatientRecords();
             response.getWriter().write(gson.toJson(records));
-        } else if ("view".equals(action)) {
-            handleViewPatientRecord(request, response);
+        } else if ("edit".equals(action)) {
+            handleEditRecord(request, response);
         }
     }
 
-    private void handleViewPatientRecord(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleEditRecord(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -82,11 +82,15 @@ public class PatientRecordServlet extends HttpServlet {
         PatientRecord record;
 
         try {
-            record = gson.fromJson(jsonString, PatientRecord.class);
-
+            record = gson.fromJson(jsonString, PatientRecord.class);          
+            if (record.getPatient_name() == null || record.getPatient_name().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"Patient name is required\"}");
+                return;
+            }
             if ("create".equals(action)) {
                 iPatientRecordDAO.insertPatientRecord(record);
-                response.getWriter().write("{\"message\": \"Patient record created successfully\"}");
+                response.getWriter().write("{\"status\": \"success\", \"message\": \"Patient record created successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Invalid action\"}");
@@ -112,17 +116,32 @@ public class PatientRecordServlet extends HttpServlet {
             return;
         }
 
+        int record_id;
         try {
+            record_id = Integer.parseInt(recordIdParam);
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Invalid record ID format\"}");
+            return;
+        }
+
+        String jsonString = getRequestBody(request);
+        PatientRecord record;
+
+        try {
+            record = gson.fromJson(jsonString, PatientRecord.class);
+            record.setRecord_id(record_id);
+
             int record_id = Integer.parseInt(recordIdParam.trim());
             String jsonString = getRequestBody(request);
             PatientRecord record = gson.fromJson(jsonString, PatientRecord.class);
             record.setRecord_id(record_id); // Keep the original record ID
 
-            if (record.getDiagnosis() == null) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\": \"Missing required fields\"}");
-                return;
-            }
+//             if (record.getDiagnosis() == null) {
+//                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//                 response.getWriter().write("{\"error\": \"Missing required fields\"}");
+//                 return;
+//             }
 
             iPatientRecordDAO.updatePatientRecord(record);
             response.getWriter().write("{\"message\": \"Patient record updated successfully\"}");
@@ -142,6 +161,7 @@ public class PatientRecordServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CorsUtil.addCorsHeaders(response);
         response.setContentType("application/json");
+
         String action = request.getParameter("action");
         String recordIDStr = request.getParameter("id");
 
@@ -158,8 +178,8 @@ public class PatientRecordServlet extends HttpServlet {
                 return;
             }
 
-            int recordID = Integer.parseInt(recordIDStr.trim());
-            iPatientRecordDAO.deletePatientRecord(recordID);
+            int recordId = Integer.parseInt(recordIDStr.trim());
+            iPatientRecordDAO.deletePatientRecord(recordId);
             response.getWriter().write("{\"message\": \"Patient record deleted successfully\"}");
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -178,6 +198,7 @@ public class PatientRecordServlet extends HttpServlet {
                 jsonBuffer.append(line);
             }
         }
+
         return jsonBuffer.toString();
     }
 }
